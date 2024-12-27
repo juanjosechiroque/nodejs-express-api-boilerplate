@@ -5,14 +5,9 @@ jest.unstable_mockModule("../api/users/users.dao.js", () => ({
     existsEmailUserDao: jest.fn().mockResolvedValue(false),
 }));
 
-jest.unstable_mockModule("jsonwebtoken", () => ({
-    sign: jest.fn().mockReturnValue("mocked-jwt-token"),
-    verify: jest.fn().mockImplementation((token) => {
-        if (token === "mocked-jwt-token") {
-            return { email: "test@example.com" }; // Payload simulado
-        }
-        throw new Error("Token inválido o expirado");
-    }),
+jest.unstable_mockModule("../utils/jwt.js", () => ({
+    generateToken: jest.fn(),
+    verifyToken: jest.fn(),
 }));
 
 const { api } = await import("./helpers.js");

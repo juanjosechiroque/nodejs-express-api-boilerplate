@@ -3,16 +3,14 @@ import { verifyToken } from "../utils/jwt.js";
 export const authenticate = (req, res, next) => {
     const authHeader = req.header("Authorization");
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader || !authHeader.startsWith("Bearer")) {
         return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const token = req.header("Authorization").replace("Bearer ", "");
+    const token = authHeader.slice(7).trim();
 
-    if (!token) {
-        return res
-            .status(401)
-            .json({ message: "Acceso denegado. No se proporcionó token." });
+    if (!token || token === "") {
+        return res.status(401).json({ message: "Access denied" });
     }
 
     try {
@@ -20,6 +18,6 @@ export const authenticate = (req, res, next) => {
         req.user = decoded;
         next();
     } catch (error) {
-        res.status(401).json({ message: "Token inválido o expirado" });
+        res.status(401).json({ message: "Invalid or expired token" });
     }
 };

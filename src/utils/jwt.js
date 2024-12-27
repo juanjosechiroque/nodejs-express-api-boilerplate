@@ -1,5 +1,4 @@
-// import jwt from "jsonwebtoken";
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 const { sign, verify } = jwt;
 
 import { JWT_SECRET, JWT_EXPIRATION_TIME } from "../config.js";
