@@ -3,6 +3,7 @@ import {
     getProductsHandler,
     createProductHandler,
     updateProductHandler,
+    deleteProductHandler,
 } from "./products.controller.js";
 import { authenticate } from "../../middleware/authMiddleware.js";
 import { validate } from "../../middleware/validationMiddleware.js";
@@ -23,5 +24,7 @@ router.put(
     validate(updateProductSchema),
     updateProductHandler
 );
+
+router.delete("/:id", authenticate, deleteProductHandler);
 
 export default router;

@@ -2,6 +2,7 @@ import {
     createProductDao,
     getProductsDao,
     updateProductDao,
+    deleteProductDao,
 } from "./products.dao.js";
 
 export async function getProducts() {
@@ -15,4 +16,9 @@ export async function createProduct({ name, price }) {
 
 export async function updateProduct({ id, name, price }) {
     return await updateProductDao({ id, name, price });
+}
+
+export async function deleteProduct(productId) {
+    const result = await deleteProductDao(productId);
+    return result;
 }

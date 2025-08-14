@@ -135,3 +135,33 @@ describe("PUT /products/:id", () => {
         expect(response.body).toHaveProperty("message", "Product not found");
     });
 });
+
+describe("DELETE /products", () => {
+    test("should delete a product", async () => {
+        const productId = "1";
+        const productsMock = [
+            { _id: productId, name: "Mocked Product 1", price: 100 },
+        ];
+        mockMongoose
+            .model("Product")
+            .findByIdAndDelete.mockResolvedValue(productsMock[0]);
+
+        const response = await api
+            .delete(`/products/${productId}`)
+            .set("Authorization", "Bearer valid-token");
+
+        expect(response.status).toBe(200);
+    });
+
+    test("should return an error when product not found", async () => {
+        const productId = "1";
+        mockMongoose.model("Product").findByIdAndDelete.mockResolvedValue(null);
+
+        const response = await api
+            .delete(`/products/${productId}`)
+            .set("Authorization", "Bearer valid-token");
+
+        expect(response.status).toBe(404);
+        expect(response.body).toHaveProperty("message", "Product not found");
+    });
+});

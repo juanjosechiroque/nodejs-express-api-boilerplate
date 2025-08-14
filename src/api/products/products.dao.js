@@ -12,3 +12,8 @@ export async function getProductsDao() {
 export async function updateProductDao({ id, name, price }) {
     return await Product.findByIdAndUpdate(id, { name, price }, { new: true });
 }
+
+export async function deleteProductDao(productId) {
+    const product = await Product.findByIdAndDelete(productId);
+    return product;
+}
