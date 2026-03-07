@@ -1,23 +1,15 @@
-export const BadRequestError = (errorMessage) => {
-    return {
-        code: "BadRequestError",
-        message: errorMessage,
-        statusCode: 400,
-    };
-};
+function createAppError(message, code, statusCode) {
+    const err = new Error(message);
+    err.code = code;
+    err.statusCode = statusCode;
+    return err;
+}
 
-export const UnauthorizedError = (errorMessage) => {
-    return {
-        code: "UnauthorizedError",
-        message: errorMessage,
-        statusCode: 401,
-    };
-};
+export const BadRequestError = (errorMessage) =>
+    createAppError(errorMessage, "BadRequestError", 400);
 
-export const NotFoundError = (errorMessage) => {
-    return {
-        code: "NotFoundError",
-        message: errorMessage,
-        statusCode: 404,
-    };
-};
+export const UnauthorizedError = (errorMessage) =>
+    createAppError(errorMessage, "UnauthorizedError", 401);
+
+export const NotFoundError = (errorMessage) =>
+    createAppError(errorMessage, "NotFoundError", 404);
