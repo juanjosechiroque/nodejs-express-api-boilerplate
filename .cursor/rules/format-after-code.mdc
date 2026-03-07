@@ -1,0 +1,17 @@
+---
+
+description: Run format after generating or editing code
+alwaysApply: true
+---
+
+# Format After Code Changes
+
+After creating or modifying JavaScript or TypeScript files (e.g. `.js`, `.ts`, `.mjs` — not `.json`, `.md`, `.env`, or config files), run the following once, after all changes are completed, from the project root:
+
+```bash
+npm run format
+```
+
+Run only if at least one source file was modified.
+
+This keeps the codebase lint-clean and consistently formatted.
