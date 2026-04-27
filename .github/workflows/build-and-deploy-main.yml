@@ -1,0 +1,60 @@
+name: Build and Deploy Main
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+    workflow_dispatch:
+
+concurrency:
+    group: build-deploy-main-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
+env:
+    IMAGE_NAME: nodejs-express-api-boilerplate
+
+jobs:
+    build-and-deploy:
+        name: Build, validate, and deploy
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v6
+              with:
+                  node-version: "24"
+                  cache: npm
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Lint and format check
+              run: npm run validate
+
+            - name: Run tests
+              run: npm test
+
+            - name: Resolve image tag
+              id: commit
+              run: echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+            - name: Build Docker image
+              run: |
+                  docker buildx create --use
+                  docker buildx build \
+                    -t ${{ env.IMAGE_NAME }}:${{ steps.commit.outputs.sha }} \
+                    --load .
+
+            - name: Simulate deploy
+              if: github.event_name != 'pull_request'
+              run: |
+                  echo "Docker image built: ${{ env.IMAGE_NAME }}:${{ steps.commit.outputs.sha }}"
+                  echo "Deploy would run here after a merge/push to main."
+                  echo "Replace this step with cloud/VPS deploy commands that use the pushed image."
