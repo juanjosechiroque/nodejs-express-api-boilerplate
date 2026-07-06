@@ -1,14 +1,20 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
+import type { Mock } from "vitest";
+import type { Request, Response } from "express";
 import { errorGenericHandler } from "./errorMiddleware.js";
 
-function makeRes() {
-    const res = {};
-    res.status = vi.fn().mockReturnValue(res);
-    res.json = vi.fn().mockReturnValue(res);
-    return res;
+type MockRes = Response & { status: Mock; json: Mock };
+
+function makeRes(): MockRes {
+    const status: Mock = vi.fn();
+    const json: Mock = vi.fn();
+    const res = { status, json };
+    status.mockReturnValue(res);
+    json.mockReturnValue(res);
+    return res as unknown as MockRes;
 }
 
-const req = {};
+const req = {} as unknown as Request;
 const next = vi.fn();
 
 describe("errorGenericHandler", () => {
@@ -99,7 +105,7 @@ describe("errorGenericHandler", () => {
             details: "not an array",
         };
         errorGenericHandler(err, req, res, next);
-        const body = res.json.mock.calls[0][0];
+        const body = res.json.mock.calls[0]![0] as Record<string, unknown>;
         expect(body).not.toHaveProperty("details");
     });
 
@@ -109,7 +115,7 @@ describe("errorGenericHandler", () => {
         const res = makeRes();
         const err = new Error("Unexpected");
         errorGenericHandler(err, req, res, next);
-        const body = res.json.mock.calls[0][0];
+        const body = res.json.mock.calls[0]![0] as Record<string, unknown>;
         expect(body).toHaveProperty("stack");
     });
 
@@ -119,8 +125,8 @@ describe("errorGenericHandler", () => {
         const res = makeRes();
         const err = new Error("Secret internal detail");
         errorGenericHandler(err, req, res, next);
-        const body = res.json.mock.calls[0][0];
-        expect(body.message).toBe("Internal server error");
+        const body = res.json.mock.calls[0]![0] as Record<string, unknown>;
+        expect(body["message"]).toBe("Internal server error");
         expect(body).not.toHaveProperty("stack");
     });
 });

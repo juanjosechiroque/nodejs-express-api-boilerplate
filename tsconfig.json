@@ -14,8 +14,8 @@
         "noUncheckedIndexedAccess": true,
         "exactOptionalPropertyTypes": true,
         "isolatedModules": true,
-        "types": ["node"]
+        "types": ["node", "vitest/globals"]
     },
     "include": ["index.ts", "src/**/*.ts"],
-    "exclude": ["node_modules", "dist", "coverage", "src/**/*.test.ts", "src/tests/**/*.ts"]
+    "exclude": ["node_modules", "dist", "coverage"]
 }

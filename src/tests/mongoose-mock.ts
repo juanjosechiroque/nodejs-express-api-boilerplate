@@ -1,4 +1,16 @@
 import { vi } from "vitest";
+import type { Mock } from "vitest";
+
+type MockModel = Mock & {
+    find: Mock;
+    findOne: Mock;
+    findById: Mock;
+    findByIdAndUpdate: Mock;
+    findOneAndDelete: Mock;
+    findByIdAndDelete: Mock;
+    create: Mock;
+    prototype: { save: Mock };
+};
 
 const mockSchema = () => ({
     set: vi.fn(),
@@ -6,15 +18,19 @@ const mockSchema = () => ({
     index: vi.fn(),
 });
 
-const createMockModel = () => {
+const createMockModel = (): MockModel => {
     const Model = vi.fn(function (this: Record<string, unknown>, data: Record<string, unknown>) {
         Object.assign(this, data);
-    });
+    }) as unknown as MockModel;
 
-    const defaultFindChain: Record<string, unknown> = {};
-    defaultFindChain.limit = vi.fn().mockReturnValue(defaultFindChain);
-    defaultFindChain.sort = vi.fn().mockReturnValue(defaultFindChain);
-    defaultFindChain.lean = vi.fn().mockResolvedValue([]);
+    const defaultFindChain = {
+        limit: vi.fn(),
+        sort: vi.fn(),
+        lean: vi.fn().mockResolvedValue([]),
+    };
+    defaultFindChain.limit.mockReturnValue(defaultFindChain);
+    defaultFindChain.sort.mockReturnValue(defaultFindChain);
+
     Model.find = vi.fn(() => defaultFindChain);
     Model.findOne = vi.fn().mockResolvedValue(null);
     const defaultFindByIdChain = { lean: vi.fn().mockResolvedValue(null) };
@@ -24,12 +40,12 @@ const createMockModel = () => {
     Model.findOneAndDelete = vi.fn().mockResolvedValue(null);
     Model.findByIdAndDelete = vi.fn().mockResolvedValue(null);
     Model.create = vi.fn().mockResolvedValue({});
-    Model.prototype.save = vi.fn().mockResolvedValue({});
+    Model.prototype = { save: vi.fn().mockResolvedValue({}) };
 
     return Model;
 };
 
-const models: Record<string, ReturnType<typeof createMockModel>> = {
+const models: Record<string, MockModel> = {
     Product: createMockModel(),
     User: createMockModel(),
 };
@@ -38,7 +54,7 @@ export const mockMongoose = {
     Schema: vi.fn(function MockSchema() {
         return mockSchema();
     }),
-    model: vi.fn((modelName: string) => models[modelName] || createMockModel()),
+    model: vi.fn((modelName: string) => models[modelName] ?? createMockModel()),
     connection: { readyState: 1 },
     ConnectionStates: {
         disconnected: 0,

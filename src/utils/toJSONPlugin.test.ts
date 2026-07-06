@@ -1,16 +1,22 @@
 import { describe, expect, test } from "vitest";
+import type { Schema } from "mongoose";
 import { toJSONPlugin } from "./toJSONPlugin.js";
+
+type ToJsonConfig = {
+    versionKey: boolean;
+    transform: (doc: unknown, ret: Record<string, unknown>) => void;
+};
 
 describe("toJSONPlugin", () => {
     function applyPlugin() {
-        let capturedConfig;
+        let capturedConfig: ToJsonConfig | undefined;
         const mockSchema = {
-            set: (key, config) => {
+            set: (_key: string, config: ToJsonConfig) => {
                 capturedConfig = config;
             },
         };
-        toJSONPlugin(mockSchema);
-        return capturedConfig;
+        toJSONPlugin(mockSchema as unknown as Schema);
+        return capturedConfig as ToJsonConfig;
     }
 
     test("sets versionKey to false", () => {
@@ -20,23 +26,27 @@ describe("toJSONPlugin", () => {
 
     test("maps _id to id", () => {
         const { transform } = applyPlugin();
-        const ret = { _id: { toHexString: () => "abc123" }, name: "test" };
+        const ret: Record<string, unknown> = { _id: { toHexString: () => "abc123" }, name: "test" };
         transform({}, ret);
-        expect(ret.id).toBe("abc123");
+        expect(ret["id"]).toBe("abc123");
     });
 
     test("removes _id from output", () => {
         const { transform } = applyPlugin();
-        const ret = { _id: { toHexString: () => "abc123" } };
+        const ret: Record<string, unknown> = { _id: { toHexString: () => "abc123" } };
         transform({}, ret);
-        expect(ret._id).toBeUndefined();
+        expect(ret["_id"]).toBeUndefined();
     });
 
     test("preserves other fields", () => {
         const { transform } = applyPlugin();
-        const ret = { _id: { toHexString: () => "abc123" }, name: "test", price: 42 };
+        const ret: Record<string, unknown> = {
+            _id: { toHexString: () => "abc123" },
+            name: "test",
+            price: 42,
+        };
         transform({}, ret);
-        expect(ret.name).toBe("test");
-        expect(ret.price).toBe(42);
+        expect(ret["name"]).toBe("test");
+        expect(ret["price"]).toBe(42);
     });
 });

@@ -80,10 +80,8 @@ describe(`GET ${V1}/products`, () => {
     });
 
     test("should return 500 when getProducts throws", async () => {
-        const chain = {};
-        chain.limit = vi.fn().mockReturnValue(chain);
-        chain.sort = vi.fn().mockReturnValue(chain);
-        chain.lean = vi.fn().mockRejectedValue(new Error("DB error"));
+        const chain = makeFindChain([]);
+        (chain.lean as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error("DB error"));
         mockMongoose.model("Product").find.mockReturnValueOnce(chain);
 
         const response = await api.get(`${V1}/products`);
@@ -287,9 +285,6 @@ describe(`DELETE ${V1}/products/:id`, () => {
             price: 100,
             status: "archived",
         };
-        mockMongoose
-            .model("Product")
-            .findById.mockReturnValueOnce({ lean: vi.fn().mockResolvedValue(productMock) });
         mockMongoose.model("Product").findOneAndDelete.mockResolvedValueOnce(productMock);
 
         const response = await api
@@ -300,6 +295,8 @@ describe(`DELETE ${V1}/products/:id`, () => {
     });
 
     test("should return 400 when deleting an active product", async () => {
+        // findOneAndDelete returns null because $ne:"active" filter excluded it
+        mockMongoose.model("Product").findOneAndDelete.mockResolvedValueOnce(null);
         mockMongoose.model("Product").findById.mockReturnValueOnce({
             lean: vi.fn().mockResolvedValue({ _id: validMongoId, status: "active" }),
         });
@@ -325,6 +322,8 @@ describe(`DELETE ${V1}/products/:id`, () => {
     });
 
     test("should return an error when product not found", async () => {
+        // findOneAndDelete returns null, then findById confirms it doesn't exist
+        mockMongoose.model("Product").findOneAndDelete.mockResolvedValueOnce(null);
         mockMongoose
             .model("Product")
             .findById.mockReturnValueOnce({ lean: vi.fn().mockResolvedValue(null) });

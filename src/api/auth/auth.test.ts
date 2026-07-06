@@ -15,7 +15,9 @@ describe(`POST ${V1}/auth/signup`, () => {
             __v: 0,
         };
 
-        mockMongoose.model("User").prototype.save.mockImplementationOnce(function () {
+        mockMongoose.model("User").prototype.save.mockImplementationOnce(function (
+            this: Record<string, unknown>
+        ) {
             Object.assign(this, userMocked);
             return Promise.resolve(this);
         });
@@ -41,8 +43,7 @@ describe(`POST ${V1}/auth/signup`, () => {
     test("should return 400 on duplicate key race condition (err.code 11000)", async () => {
         const data = { email: "test@example.com", password: "test1234" };
         mockMongoose.model("User").findOne.mockResolvedValueOnce(null);
-        const duplicateKeyError = new Error("Duplicate key");
-        duplicateKeyError.code = 11000;
+        const duplicateKeyError = Object.assign(new Error("Duplicate key"), { code: 11000 });
         mockMongoose.model("User").prototype.save.mockRejectedValueOnce(duplicateKeyError);
 
         const response = await api.post(`${V1}/auth/signup`).send(data);

@@ -1,14 +1,20 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
+import type { Mock } from "vitest";
+import type { Request, Response } from "express";
 import { z } from "zod";
 import { validate, validateParams, validateQuery } from "./validationMiddleware.js";
 
 const next = vi.fn();
 
-function makeRes() {
-    const res = {};
-    res.status = vi.fn().mockReturnValue(res);
-    res.json = vi.fn().mockReturnValue(res);
-    return res;
+type MockRes = Response & { status: Mock; json: Mock };
+
+function makeRes(): MockRes {
+    const status: Mock = vi.fn();
+    const json: Mock = vi.fn();
+    const res = { status, json };
+    status.mockReturnValue(res);
+    json.mockReturnValue(res);
+    return res as unknown as MockRes;
 }
 
 beforeEach(() => next.mockClear());
@@ -17,23 +23,23 @@ const schema = z.object({ name: z.string() });
 
 describe("validate (body)", () => {
     test("calls next with no error when body is valid", () => {
-        const req = { body: { name: "test" } };
+        const req = { body: { name: "test" } } as unknown as Request;
         validate(schema)(req, makeRes(), next);
         expect(next).toHaveBeenCalledWith();
     });
 
     test("calls next with BadRequestError when body is invalid", () => {
-        const req = { body: {} };
+        const req = { body: {} } as unknown as Request;
         validate(schema)(req, makeRes(), next);
-        const err = next.mock.calls[0][0];
+        const err = next.mock.calls[0]?.[0] as { statusCode: number; details: unknown[] };
         expect(err.statusCode).toBe(400);
         expect(err.details).toBeInstanceOf(Array);
     });
 
     test("handles missing body gracefully", () => {
-        const req = {};
+        const req = {} as unknown as Request;
         validate(schema)(req, makeRes(), next);
-        const err = next.mock.calls[0][0];
+        const err = next.mock.calls[0]?.[0] as { statusCode: number };
         expect(err.statusCode).toBe(400);
     });
 });
@@ -42,23 +48,23 @@ describe("validateParams", () => {
     const paramSchema = z.object({ id: z.string() });
 
     test("calls next with no error when params are valid", () => {
-        const req = { params: { id: "abc123" } };
+        const req = { params: { id: "abc123" } } as unknown as Request;
         validateParams(paramSchema)(req, makeRes(), next);
         expect(next).toHaveBeenCalledWith();
     });
 
     test("calls next with BadRequestError when params are invalid", () => {
-        const req = { params: {} };
+        const req = { params: {} } as unknown as Request;
         validateParams(paramSchema)(req, makeRes(), next);
-        const err = next.mock.calls[0][0];
+        const err = next.mock.calls[0]?.[0] as { statusCode: number; details: unknown[] };
         expect(err.statusCode).toBe(400);
         expect(err.details).toBeInstanceOf(Array);
     });
 
     test("handles missing params gracefully", () => {
-        const req = {};
+        const req = {} as unknown as Request;
         validateParams(paramSchema)(req, makeRes(), next);
-        const err = next.mock.calls[0][0];
+        const err = next.mock.calls[0]?.[0] as { statusCode: number };
         expect(err.statusCode).toBe(400);
     });
 });
@@ -70,31 +76,40 @@ describe("validateQuery", () => {
     });
 
     test("calls next with no error and sets req.validatedQuery when query is valid", () => {
-        const req = { query: { page: "2", limit: "5" } };
+        const req = { query: { page: "2", limit: "5" } } as unknown as Request;
         validateQuery(querySchema)(req, makeRes(), next);
         expect(next).toHaveBeenCalledWith();
-        expect(req.validatedQuery).toEqual({ page: 2, limit: 5 });
+        expect((req as Request & { validatedQuery: unknown }).validatedQuery).toEqual({
+            page: 2,
+            limit: 5,
+        });
     });
 
     test("applies defaults when query is empty", () => {
-        const req = { query: {} };
+        const req = { query: {} } as unknown as Request;
         validateQuery(querySchema)(req, makeRes(), next);
         expect(next).toHaveBeenCalledWith();
-        expect(req.validatedQuery).toEqual({ page: 1, limit: 10 });
+        expect((req as Request & { validatedQuery: unknown }).validatedQuery).toEqual({
+            page: 1,
+            limit: 10,
+        });
     });
 
     test("calls next with BadRequestError when query is invalid", () => {
-        const req = { query: { page: "0" } };
+        const req = { query: { page: "0" } } as unknown as Request;
         validateQuery(querySchema)(req, makeRes(), next);
-        const err = next.mock.calls[0][0];
+        const err = next.mock.calls[0]?.[0] as { statusCode: number; details: unknown[] };
         expect(err.statusCode).toBe(400);
         expect(err.details).toBeInstanceOf(Array);
     });
 
     test("handles missing query gracefully", () => {
-        const req = {};
+        const req = {} as unknown as Request;
         validateQuery(querySchema)(req, makeRes(), next);
         expect(next).toHaveBeenCalledWith();
-        expect(req.validatedQuery).toEqual({ page: 1, limit: 10 });
+        expect((req as Request & { validatedQuery: unknown }).validatedQuery).toEqual({
+            page: 1,
+            limit: 10,
+        });
     });
 });
