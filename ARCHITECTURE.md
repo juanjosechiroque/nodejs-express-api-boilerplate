@@ -54,6 +54,12 @@ Each domain feature is self-contained in `src/api/{feature}/`:
 
 Support modules without HTTP endpoints omit `router` and `controller` until routes are needed.
 
+## Feature scope
+
+The public auth API only includes signup and login so the starter can issue JWTs for protected routes without becoming a full user-management system. The `user` module remains internal support for credentials, password hashing, and lookup by email.
+
+The `product` module is the reference feature: public reads, protected writes, Zod validation, service/repository/model separation, cursor pagination, filters, defaults, and one service-level rule for archived-before-delete behavior.
+
 ## Layer responsibilities and data flow
 
 ```
@@ -84,8 +90,6 @@ router.get("/:id", validateParams(productIdParamSchema), asyncHandler(getProduct
 // validate query string — result available at req.validatedQuery
 router.get("/", validateQuery(listProductsQuerySchema), asyncHandler(getProductsHandler));
 ```
-
-The `product` feature is intentionally small. Treat it as the reference implementation for routing, validation, auth-protected writes, pagination, query filters, service/repository/model separation, and tests. Products include a minimal lifecycle (`draft`, `active`, `archived`) plus inventory-style fields (`price`, `stock`, `isFeatured`). Add business-heavy modules in downstream apps rather than turning this starter into a full product.
 
 Keep small business rules in the service layer. Example: active products must be archived before deletion.
 
