@@ -91,6 +91,8 @@ Requests include a correlation ID for logs:
 
 ## API Endpoints
 
+The HTTP contract is documented in [openapi.yaml](./openapi.yaml).
+
 | Method   | Endpoint           | Auth required | Description                                       |
 | -------- | ------------------ | ------------- | ------------------------------------------------- |
 | `GET`    | `/`                | No            | Basic API status check.                           |

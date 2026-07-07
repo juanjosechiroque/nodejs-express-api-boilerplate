@@ -77,3 +77,4 @@ Declare and validate with Zod in `src/config.ts`. Never read `process.env` direc
 - Add Express objects (`req`, `res`, `next`) to a service
 - Create files outside `src/api/{feature}/` for feature-specific code
 - Return raw Mongoose documents from a repository on read queries (use `.lean()`)
+- Change routes, validation schemas, or response shapes without updating `openapi.yaml`

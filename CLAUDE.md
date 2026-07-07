@@ -21,3 +21,5 @@ npm run validate && npm run typecheck && npm run build && npm test
 ```
 
 All checks must pass. Fix any failures before committing — do not skip hooks.
+
+When changing routes, validation schemas, or response shapes, update `openapi.yaml`.

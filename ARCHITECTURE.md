@@ -110,6 +110,10 @@ All error responses flow through the centralized `errorGenericHandler` middlewar
 
 Stack traces and internal error details are never exposed in production.
 
+## API contract
+
+The public HTTP contract is documented in `openapi.yaml`. Keep it aligned when routes, validation schemas, or response shapes change.
+
 ## Error handling
 
 Typed error factories live in `src/errors.ts`:
