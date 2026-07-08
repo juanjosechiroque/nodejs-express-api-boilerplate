@@ -136,6 +136,8 @@ JWT errors distinguish between `TOKEN_EXPIRED` and `INVALID_TOKEN` so clients ca
 
 Protected routes use the `authenticate` middleware, which validates `Authorization: Bearer <token>` and attaches the decoded payload to `req.user`. JWT tokens are signed and verified with HS256 explicitly configured.
 
+JWTs are stateless, but protected routes also verify that the token subject still maps to an active user. This allows access to be disabled by changing user status without adding token blacklists, refresh-token storage, or session tracking.
+
 Public and protected routes are declared explicitly in each router — no global auth applied by default.
 
 Auth endpoints (`/signup`, `/login`) apply a fixed rate limit (10 requests per 15 minutes per IP). This is intentionally not configurable — it is a security control, not an operational parameter.

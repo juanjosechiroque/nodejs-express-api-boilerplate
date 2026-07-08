@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { beforeEach, vi } from "vitest";
 import mockMongoose from "./mongoose-mock.js";
 import { UnauthorizedError } from "../errors.js";
 
@@ -11,6 +11,20 @@ vi.mock("mongoose", () => ({
 }));
 
 const mockUserId = "507f1f77bcf86cd799439011";
+
+function mockActiveUserLookup() {
+    mockMongoose.model("User").findById.mockReturnValue({
+        lean: vi.fn().mockResolvedValue({
+            _id: mockUserId,
+            email: "test@example.com",
+            status: "active",
+        }),
+    });
+}
+
+beforeEach(() => {
+    mockActiveUserLookup();
+});
 
 vi.mock("../utils/jwt.js", () => ({
     generateToken: vi.fn(() => "valid-token"),

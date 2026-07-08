@@ -1,10 +1,19 @@
 import bcrypt from "bcrypt";
 import { BadRequestError, UnauthorizedError } from "../../errors.js";
 import { generateToken } from "../../utils/jwt.js";
-import { createUser, findUserByEmail } from "./user.repository.js";
+import { createUser, findUserByEmail, findUserById } from "./user.repository.js";
 import type { UserCredentials } from "./user.types.js";
 
 const EMAIL_ALREADY_REGISTERED_MESSAGE = "Email address is already registered";
+
+export type UserInactiveReason = "user_not_found" | "user_disabled";
+
+export async function getUserInactiveReason(id: string): Promise<UserInactiveReason | null> {
+    const user = await findUserById(id);
+    if (!user) return "user_not_found";
+    if (user.status !== "active") return "user_disabled";
+    return null;
+}
 
 export async function registerUser({ email, password }: UserCredentials) {
     const normalizedEmail = email.trim().toLowerCase();

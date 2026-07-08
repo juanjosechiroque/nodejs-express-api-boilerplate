@@ -53,7 +53,11 @@ async function seed() {
     await connectDB();
 
     await User.deleteOne({ email: DEMO_USER_EMAIL });
-    const demoUser = new User({ email: DEMO_USER_EMAIL, password: DEMO_USER_PASSWORD });
+    const demoUser = new User({
+        email: DEMO_USER_EMAIL,
+        password: DEMO_USER_PASSWORD,
+        status: "active",
+    });
     await demoUser.save();
 
     await Promise.all(

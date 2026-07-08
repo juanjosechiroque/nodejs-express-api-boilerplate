@@ -322,3 +322,48 @@ describe("DELETE /v1/products/:id", () => {
         expect(response.body).toHaveProperty("message", "Product not found");
     });
 });
+
+describe("authenticate user status", () => {
+    function mockUserLookup(user: Record<string, unknown> | null) {
+        mockMongoose.model("User").findById.mockReturnValueOnce({
+            lean: vi.fn().mockResolvedValue(user),
+        });
+    }
+
+    it("allows a protected route when the JWT user is active", async () => {
+        mockUserLookup({ _id: validMongoId, email: "test@example.com", status: "active" });
+
+        const response = await api
+            .post(`${V1}/products`)
+            .set("Authorization", "Bearer valid-token")
+            .send({ name: "test", price: 10 });
+
+        expect(response.status).toBe(201);
+    });
+
+    it("returns 401 when the JWT user does not exist", async () => {
+        mockUserLookup(null);
+
+        const response = await api
+            .post(`${V1}/products`)
+            .set("Authorization", "Bearer valid-token")
+            .send({ name: "test", price: 10 });
+
+        expect(response.status).toBe(401);
+        expect(response.body).toHaveProperty("code", "INVALID_TOKEN");
+        expect(response.body).toHaveProperty("message", "Invalid or expired token");
+    });
+
+    it("returns 401 when the JWT user is disabled", async () => {
+        mockUserLookup({ _id: validMongoId, email: "test@example.com", status: "disabled" });
+
+        const response = await api
+            .post(`${V1}/products`)
+            .set("Authorization", "Bearer valid-token")
+            .send({ name: "test", price: 10 });
+
+        expect(response.status).toBe(401);
+        expect(response.body).toHaveProperty("code", "INVALID_TOKEN");
+        expect(response.body).toHaveProperty("message", "Invalid or expired token");
+    });
+});

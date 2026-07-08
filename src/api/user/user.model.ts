@@ -6,6 +6,11 @@ const userSchema = new Schema(
     {
         email: { type: String, required: true, unique: true, lowercase: true },
         password: { type: String, required: true },
+        status: {
+            type: String,
+            enum: ["active", "disabled"],
+            default: "active",
+        },
     },
     {
         timestamps: { createdAt: "created_at", updatedAt: "updated_at" },

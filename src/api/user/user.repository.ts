@@ -10,3 +10,7 @@ export async function createUser({ email, password }: UserCredentials) {
 export async function findUserByEmail({ email }: Pick<UserCredentials, "email">) {
     return await User.findOne({ email }).lean();
 }
+
+export async function findUserById(id: string) {
+    return await User.findById(id).lean();
+}
