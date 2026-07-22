@@ -27,6 +27,8 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/RootStatus"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
 
     /v1/health:
         parameters:
@@ -54,6 +56,8 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/HealthResponse"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
 
     /v1/auth/signup:
         parameters:
@@ -80,6 +84,8 @@ paths:
                                 $ref: "#/components/schemas/AuthResponse"
                 "400":
                     $ref: "#/components/responses/BadRequest"
+                "413":
+                    $ref: "#/components/responses/PayloadTooLarge"
                 "429":
                     $ref: "#/components/responses/TooManyRequests"
 
@@ -110,6 +116,8 @@ paths:
                     $ref: "#/components/responses/BadRequest"
                 "401":
                     $ref: "#/components/responses/Unauthorized"
+                "413":
+                    $ref: "#/components/responses/PayloadTooLarge"
                 "429":
                     $ref: "#/components/responses/TooManyRequests"
 
@@ -154,6 +162,8 @@ paths:
                                 $ref: "#/components/schemas/ProductListResponse"
                 "400":
                     $ref: "#/components/responses/BadRequest"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
         post:
             summary: Create a product
             operationId: createProduct
@@ -184,6 +194,10 @@ paths:
                     $ref: "#/components/responses/BadRequest"
                 "401":
                     $ref: "#/components/responses/Unauthorized"
+                "413":
+                    $ref: "#/components/responses/PayloadTooLarge"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
 
     /v1/products/{id}:
         parameters:
@@ -212,6 +226,8 @@ paths:
                     $ref: "#/components/responses/BadRequest"
                 "404":
                     $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
         patch:
             summary: Partially update a product
             operationId: updateProduct
@@ -244,6 +260,10 @@ paths:
                     $ref: "#/components/responses/Unauthorized"
                 "404":
                     $ref: "#/components/responses/NotFound"
+                "413":
+                    $ref: "#/components/responses/PayloadTooLarge"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
         delete:
             summary: Delete a product
             operationId: deleteProduct
@@ -271,6 +291,8 @@ paths:
                     $ref: "#/components/responses/Unauthorized"
                 "404":
                     $ref: "#/components/responses/NotFound"
+                "429":
+                    $ref: "#/components/responses/TooManyRequests"
 
 components:
     securitySchemes:
@@ -332,6 +354,15 @@ components:
                         $ref: "#/components/schemas/ErrorResponse"
         TooManyRequests:
             description: Rate limit exceeded
+            headers:
+                x-request-id:
+                    $ref: "#/components/headers/XRequestId"
+            content:
+                application/json:
+                    schema:
+                        $ref: "#/components/schemas/ErrorResponse"
+        PayloadTooLarge:
+            description: Request body exceeds the configured size limit
             headers:
                 x-request-id:
                     $ref: "#/components/headers/XRequestId"

@@ -6,6 +6,7 @@ import cors from "cors";
 import { errorGenericHandler } from "./middleware/errorMiddleware.js";
 import { notFound } from "./middleware/notFoundMiddleware.js";
 import { requestIdMiddleware } from "./middleware/requestIdMiddleware.js";
+import { rateLimitHandler } from "./middleware/rateLimitHandler.js";
 import helmet from "helmet";
 import {
     CORS_ALLOWED_ORIGINS,
@@ -59,6 +60,7 @@ if (NODE_ENV !== "test" && RATE_LIMIT_WINDOW_MINUTES && RATE_LIMIT_MAX) {
             limit: RATE_LIMIT_MAX,
             standardHeaders: true,
             legacyHeaders: false,
+            handler: rateLimitHandler,
         })
     );
 }

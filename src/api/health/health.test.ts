@@ -22,6 +22,11 @@ describe("GET /", () => {
         const response = await api.post("/unknown-route").send({ payload: "x".repeat(11 * 1024) });
 
         expect(response.status).toBe(413);
+        expect(response.body).toMatchObject({
+            status: 413,
+            code: "PayloadTooLarge",
+            message: "Request body is too large",
+        });
     });
 });
 

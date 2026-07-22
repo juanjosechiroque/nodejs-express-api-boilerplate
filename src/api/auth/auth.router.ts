@@ -4,6 +4,7 @@ import { validate } from "../../middleware/validationMiddleware.js";
 import { loginSchema } from "./auth.validation.js";
 import { registerUserHandler, loginUserHandler } from "./auth.controller.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
+import { rateLimitHandler } from "../../middleware/rateLimitHandler.js";
 
 const router = Router();
 
@@ -12,13 +13,7 @@ const authRateLimit = rateLimit({
     limit: 10,
     standardHeaders: true,
     legacyHeaders: false,
-    handler: (req, res) => {
-        res.status(429).json({
-            status: 429,
-            code: "TooManyRequests",
-            message: "Too many attempts, please try again later",
-        });
-    },
+    handler: rateLimitHandler,
 });
 
 router.post("/signup", authRateLimit, validate(loginSchema), asyncHandler(registerUserHandler));

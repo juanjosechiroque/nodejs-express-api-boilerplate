@@ -13,6 +13,7 @@ type ResolvedError = {
 type ErrorLike = Partial<AppError> & {
     status?: number;
     name?: string;
+    type?: string;
 };
 
 function resolveError(err: unknown): ResolvedError {
@@ -27,6 +28,16 @@ function resolveError(err: unknown): ResolvedError {
     }
 
     const errorLike = err as ErrorLike;
+
+    if (errorLike.type === "entity.too.large") {
+        return {
+            statusCode: 413,
+            code: "PayloadTooLarge",
+            message: "Request body is too large",
+            stack: errorLike.stack,
+            details: undefined,
+        };
+    }
 
     if (errorLike.statusCode) {
         return {

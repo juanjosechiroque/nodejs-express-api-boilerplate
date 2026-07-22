@@ -92,6 +92,19 @@ describe("errorGenericHandler", () => {
         );
     });
 
+    it("maps an oversized request body to 413", () => {
+        const { res, statusMock, jsonMock } = makeRes();
+        errorGenericHandler({ type: "entity.too.large" }, req, res, next);
+
+        expect(statusMock).toHaveBeenCalledWith(413);
+        expect(jsonMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                code: "PayloadTooLarge",
+                message: "Request body is too large",
+            })
+        );
+    });
+
     it("includes the details array when present on the error", () => {
         const { res, jsonMock } = makeRes();
         const err = {
