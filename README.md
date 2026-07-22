@@ -6,37 +6,27 @@ The Product module is a small reference feature that shows routing, validation, 
 
 ## Quick start
 
-Requirements: Node.js 24+, npm, and Docker.
+Requirements: Docker for the standard local setup. Node.js 24+ and npm are only needed to run commands on your machine.
 
 ```bash
-npm ci
 cp .env.example .env
 # Generate a JWT secret and set JWT_SECRET in .env
 openssl rand -base64 48
-docker compose up -d mongo
-npm run dev
+docker compose up -d --build
 ```
 
 The API listens on `http://localhost:3000`.
 
 ## Configuration
 
-Copy `.env.example` to `.env`. `MONGODB_URI` is used when the API runs on your machine; Docker Compose uses its internal MongoDB service.
+Copy `.env.example` to `.env`. Docker Compose uses the local MongoDB service by default. To use Atlas or another external database, replace `MONGODB_URI` with its connection URI.
 
-| Variable                                         | Required | Purpose                                         |
-| ------------------------------------------------ | -------- | ----------------------------------------------- |
-| `MONGODB_URI`                                    | Yes      | MongoDB connection for local Node.js execution. |
-| `JWT_SECRET`                                     | Yes      | JWT signing secret; at least 32 characters.     |
-| `CORS_ALLOWED_ORIGINS`                           | No       | Comma-separated browser origin allowlist.       |
-| `RATE_LIMIT_WINDOW_MINUTES` and `RATE_LIMIT_MAX` | No       | Global per-IP limit; configure both together.   |
-
-### Connection modes
-
-| API runtime     | Database          | `MONGODB_URI`                           | Command                                          |
-| --------------- | ----------------- | --------------------------------------- | ------------------------------------------------ |
-| Node.js on host | MongoDB in Docker | `mongodb://localhost:27017/api_starter` | `docker compose up -d mongo`, then `npm run dev` |
-| Node.js on host | MongoDB Atlas     | Atlas URI                               | `npm run dev`                                    |
-| Docker Compose  | MongoDB in Docker | Not used by the container               | `docker compose up --build`                      |
+| Variable                                         | Required | Purpose                                       |
+| ------------------------------------------------ | -------- | --------------------------------------------- |
+| `MONGODB_URI`                                    | Yes      | MongoDB connection for the API container.     |
+| `JWT_SECRET`                                     | Yes      | JWT signing secret; at least 32 characters.   |
+| `CORS_ALLOWED_ORIGINS`                           | No       | Comma-separated browser origin allowlist.     |
+| `RATE_LIMIT_WINDOW_MINUTES` and `RATE_LIMIT_MAX` | No       | Global per-IP limit; configure both together. |
 
 ## API
 
@@ -70,12 +60,12 @@ curl -s -X POST http://localhost:3000/v1/products \
 | `npm run test:coverage`    | Run fast tests with coverage.                      |
 | `npm run build`            | Compile TypeScript.                                |
 
-Integration tests require Docker. Seed local demo data with `npm run seed`.
+Integration tests require Docker. After Compose is running, seed demo data with `docker compose exec api node dist/src/scripts/seed.js`.
 
 ## Docker
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
 
 Compose starts the API and MongoDB, waits for MongoDB health, and exposes API health at `/v1/health`. The image uses a multi-stage build, runs as a non-root user, and handles `SIGTERM` and `SIGINT` gracefully.
